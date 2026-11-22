@@ -3,7 +3,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="MOLECULAR PUMP | MARS MISSION",
+    page_title="ARES | Molecular Pump",
     page_icon="🚀",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -11,13 +11,35 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-.block-container {
-    padding: 0.5rem 1rem !important;
-    max-width: 1700px !important;
+html, body, .stApp {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #060c16 !important;
 }
-header[data-testid="stHeader"] {background: transparent;}
-#MainMenu, footer {visibility: hidden;}
-iframe {border-radius: 14px;}
+header[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"],
+#MainMenu, footer {
+    display: none !important;
+}
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"],
+.block-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+iframe {
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 500px !important;
+    border: none !important;
+    display: block !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -27,1235 +49,1765 @@ HTML = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <script type="importmap">
 {
- "imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
  }
 }
 </script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#080f1c;color:#eaf2fc;
-font-family:"Malgun Gothic",Arial,sans-serif}
-button,input{font:inherit}
-button{cursor:pointer;border:1px solid #35536b;
-background:#1b3049;color:#eaf5ff;border-radius:8px;
-padding:11px 15px;font-size:12px}
-button:hover{background:#294966}
-.primary{background:#087f78;border-color:#28bcae}
-.primary:hover{background:#109c90}
-.muted{color:#98adc3}
-.hidden{display:none!important}
-.top{padding:17px 24px;background:#101d2e;
-border-bottom:1px solid #284157}
-.kicker{font-size:10px;letter-spacing:2.5px;
-font-weight:bold;color:#60e6d0}
-h1{font-size:23px;margin:6px 0}
-.desc{font-size:12px;color:#9bb1c7;line-height:1.6}
-#viewport{position:relative;height:530px;
-background:radial-gradient(circle,#19304b,#070d17);
-overflow:hidden}
-#viewport canvas{display:block}
-#introUI{position:absolute;inset:0;pointer-events:none}
-.ship-title{position:absolute;top:23px;left:26px;
-font-size:12px;letter-spacing:1.5px;color:#95dfe4}
-.chapter{position:absolute;top:24px;right:26px;
-font-size:11px;color:#a5bad0}
-.novel{position:absolute;left:3%;right:3%;bottom:18px;
-padding:21px 23px;background:#091423ed;
-border:1px solid #4c6b83;border-radius:12px;
-box-shadow:0 8px 40px #0009;pointer-events:auto}
-.speaker{font-size:12px;font-weight:bold;color:#63e2d1;
-margin-bottom:10px}
-.story-text{font-size:15px;line-height:1.9;
-min-height:85px;white-space:pre-line}
-.novel-actions{display:flex;justify-content:flex-end;
-gap:9px;margin-top:13px}
-#gameUI{position:relative}
-.formula-panel{background:#102035;border-bottom:1px solid #314861;
-padding:15px 18px}
-.formula-title{font-size:11px;color:#61e3d0;
-letter-spacing:1.5px;margin-bottom:12px;font-weight:bold}
-.formula-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.eq{background:#091725;border:1px solid #34485d;
-border-radius:9px;padding:12px;transition:.2s}
-.eq.active{border-color:#56e0c6;
-box-shadow:0 0 0 1px #56e0c655;
-background:#10302f}
-.eq-name{font-size:11px;font-weight:bold;color:#77dfcd}
-.eq-math{font:15px Georgia,serif;color:#f2f6ff;
-margin:11px 0}
-.eq-explain{font-size:11px;color:#9bb1c5;line-height:1.55}
-.eq-value{color:#6fe1d2;font-weight:bold}
-.workarea{display:grid;grid-template-columns:260px minmax(0,1fr) 255px;
-gap:11px;padding:11px}
-.panel{border:1px solid #293e54;background:#111e30;
-border-radius:10px;overflow:hidden}
-.panel-head{font-size:11px;color:#6ee3d0;letter-spacing:1px;
-font-weight:bold;padding:13px 15px;border-bottom:1px solid #294055}
-.controls{padding:15px}
-.control{margin-bottom:21px}
-.control-line{display:flex;justify-content:space-between;
-font-size:12px;gap:8px}
-.control-line span:last-child{color:#66e1cd;font-weight:bold}
-.control input{width:100%;accent-color:#45d5c3;margin:10px 0 3px}
-.control small{display:block;font-size:10px;line-height:1.6;
-color:#91a6bc}
-.stage{position:relative;min-height:390px;
-background:radial-gradient(circle,#1c344d,#08111e)}
-#labMount{height:390px}
-.stage-tag{position:absolute;z-index:2;top:12px;
-padding:8px;background:#091521d9;border:1px solid #37516a;
-border-radius:6px;font-size:11px;pointer-events:none}
-.stage-tag.left{left:12px}
-.stage-tag.right{right:12px;text-align:right}
-.legend{display:flex;flex-wrap:wrap;gap:14px;
-padding:12px;font-size:11px;color:#b8cadb}
-.dot{display:inline-block;border-radius:50%;height:9px;
-width:9px;margin-right:5px}
-.lab-actions{display:flex;gap:8px;padding:12px;
-border-top:1px solid #293e54}
-.lab-actions button{flex:1}
-.stats{padding:12px;display:grid;gap:10px}
-.stat{background:#19293e;padding:13px;border-radius:8px;
-border:1px solid #2c4056}
-.stat-label{font-size:11px;color:#9cb2c9;line-height:1.5}
-.stat-number{font-size:21px;font-weight:bold;margin-top:7px}
-.stat-unit{font-size:11px;color:#8ca5ba}
-.details{padding:0 11px 15px;display:grid;
-grid-template-columns:1fr 1fr;gap:11px}
-.chart-box{background:#111e30;border:1px solid #293e54;
-border-radius:10px;padding:15px}
-.chart-heading{font-size:12px;font-weight:bold;margin-bottom:8px}
-.chart-box canvas{width:100%;height:170px}
-.chart-note{font-size:10px;color:#9ab0c7;margin-top:7px}
-.learning{margin:0 11px 15px;background:#111e30;
-border:1px solid #293e54;border-radius:10px;padding:18px}
-.learning h3{font-size:14px;margin:0 0 12px}
-.learning p,.learning li{font-size:12px;color:#adc0d3;line-height:1.9}
-.learning b{color:#edf5fd}
-.learning .notice{color:#eac891}
-.intro-footer{padding:14px 20px;color:#7891a8;font-size:11px}
-@media(max-width:1050px){
- .workarea{grid-template-columns:1fr}
- .formula-grid{grid-template-columns:1fr}
- .details{grid-template-columns:1fr}
- #viewport{height:520px}
+* { box-sizing: border-box; }
+
+html, body {
+ margin: 0;
+ width: 100%;
+ height: 100%;
+ overflow: hidden;
+ background: #060c16;
+ color: #edf5ff;
+ font-family: "Malgun Gothic", Arial, sans-serif;
+}
+
+button, input { font: inherit; }
+
+button {
+ cursor: pointer;
+ border: 1px solid #36506a;
+ background: #172b43;
+ color: #edf5ff;
+ border-radius: 9px;
+ padding: 10px 15px;
+ font-size: 12px;
+ transition: .2s;
+}
+
+button:hover { background: #284760; }
+
+.primary {
+ background: #088b83;
+ border-color: #35c9b7;
+}
+
+.primary:hover { background: #0aa99b; }
+
+#app {
+ position: relative;
+ width: 100%;
+ height: 100dvh;
+ min-height: 480px;
+ overflow: hidden;
+ background: #070e19;
+}
+
+#scene {
+ position: absolute;
+ inset: 0;
+ z-index: 0;
+}
+
+#scene canvas {
+ display: block;
+ width: 100%;
+ height: 100%;
+}
+
+.overlay {
+ position: absolute;
+ inset: 0;
+ z-index: 2;
+ pointer-events: none;
+}
+
+.overlay button,
+.overlay input,
+.overlay .panel {
+ pointer-events: auto;
+}
+
+.hidden { display: none !important; }
+
+/* ===== 공통 상단 ===== */
+
+.topbar {
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ z-index: 5;
+ height: 65px;
+ padding: 0 25px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ background: linear-gradient(
+  to bottom,
+  rgba(5,12,24,.96),
+  rgba(5,12,24,.62)
+ );
+ border-bottom: 1px solid #ffffff16;
+ pointer-events: auto;
+}
+
+.logo {
+ font-size: 13px;
+ font-weight: 800;
+ letter-spacing: 2px;
+}
+
+.logo span { color: #53e0cc; }
+
+.sublogo {
+ font-size: 10px;
+ color: #849bb4;
+ margin-top: 5px;
+ letter-spacing: 1px;
+}
+
+.top-actions {
+ display: flex;
+ align-items: center;
+ gap: 9px;
+}
+
+.top-actions button {
+ padding: 8px 12px;
+ background: #14263acb;
+}
+
+/* ===== 스토리 ===== */
+
+#storyLayer {
+ position: absolute;
+ inset: 0;
+ z-index: 3;
+ pointer-events: none;
+}
+
+.scene-info {
+ position: absolute;
+ left: 28px;
+ top: 88px;
+ font-size: 10px;
+ letter-spacing: 2px;
+ color: #83afca;
+ text-shadow: 0 2px 10px #000;
+}
+
+.story-progress {
+ position: absolute;
+ right: 28px;
+ top: 88px;
+ font: 11px Consolas, monospace;
+ color: #9abbd1;
+}
+
+.alert {
+ position: absolute;
+ top: 20%;
+ left: 50%;
+ transform: translateX(-50%);
+ padding: 12px 20px;
+ border: 1px solid #ff706c;
+ border-radius: 6px;
+ background: #581d28bb;
+ color: #ffd6d2;
+ font: bold 12px Consolas, monospace;
+ letter-spacing: 2px;
+ opacity: 0;
+ transition: opacity .4s;
+}
+
+.alert.visible {
+ opacity: 1;
+ animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+ 50% { box-shadow: 0 0 22px #e3484b66; }
+}
+
+.story-box {
+ position: absolute;
+ left: max(5%, 30px);
+ right: max(5%, 30px);
+ bottom: 4%;
+ max-width: 1080px;
+ margin: auto;
+ padding: 22px 26px;
+ border: 1px solid #64829a88;
+ border-radius: 13px;
+ background: #071321e9;
+ box-shadow: 0 15px 60px #0009;
+ backdrop-filter: blur(14px);
+ pointer-events: auto;
+}
+
+.speaker {
+ color: #65e6d0;
+ font-size: 12px;
+ font-weight: bold;
+ margin-bottom: 12px;
+ letter-spacing: .5px;
+}
+
+.story-text {
+ font-size: clamp(13px,1.5vw,17px);
+ line-height: 1.9;
+ min-height: 67px;
+ white-space: pre-line;
+}
+
+.story-actions {
+ display: flex;
+ align-items: center;
+ justify-content: flex-end;
+ gap: 9px;
+ margin-top: 12px;
+}
+
+.story-actions button { min-width: 100px; }
+
+/* ===== 실험실 ===== */
+
+#labLayer {
+ position: absolute;
+ inset: 0;
+ z-index: 3;
+ pointer-events: none;
+}
+
+.equation {
+ position: absolute;
+ top: 81px;
+ left: 50%;
+ transform: translateX(-50%);
+ width: min(650px, 60vw);
+ padding: 13px 20px;
+ border-radius: 11px;
+ border: 1px solid #4c7c86;
+ background: #081724df;
+ text-align: center;
+ backdrop-filter: blur(12px);
+}
+
+.eq-title {
+ font-size: 10px;
+ color: #68e7d1;
+ letter-spacing: 1.5px;
+ margin-bottom: 8px;
+}
+
+.eq-main {
+ font-size: clamp(15px,2vw,23px);
+ font-family: Georgia, serif;
+}
+
+.eq-meaning {
+ font-size: 11px;
+ color: #a6c0d2;
+ margin-top: 7px;
+ line-height: 1.6;
+}
+
+.chamber-label {
+ position: absolute;
+ top: 44%;
+ text-align: center;
+ font-size: 12px;
+ color: #d2ebf6;
+ text-shadow: 0 2px 12px #000;
+}
+
+.chamber-label.left { left: 5%; }
+.chamber-label.right { right: 29%; }
+
+.chamber-label strong {
+ display: block;
+ color: #67d9fb;
+ font-size: 21px;
+ margin-top: 6px;
+}
+
+.chamber-label.right strong { color: #ffb778; }
+
+.flow-label {
+ position: absolute;
+ left: 43%;
+ top: 59%;
+ transform: translateX(-50%);
+ padding: 8px 12px;
+ background: #071624b8;
+ border-radius: 18px;
+ font-size: 11px;
+ color: #65e3cd;
+}
+
+/* ===== 제어 패널 ===== */
+
+.panel {
+ position: absolute;
+ right: 18px;
+ top: 81px;
+ bottom: 90px;
+ width: min(300px, 28vw);
+ padding: 20px;
+ border: 1px solid #36536c;
+ border-radius: 14px;
+ background: #091727ee;
+ backdrop-filter: blur(16px);
+ overflow-y: auto;
+}
+
+.panel-heading {
+ font-size: 12px;
+ font-weight: bold;
+ letter-spacing: 1px;
+ color: #78e8d6;
+ margin-bottom: 21px;
+}
+
+.control { margin-bottom: 29px; }
+
+.control-top {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ font-size: 12px;
+}
+
+.control-value {
+ color: #70e4d1;
+ font-weight: bold;
+ font-size: 12px;
+ white-space: nowrap;
+}
+
+input[type="range"] {
+ width: 100%;
+ margin: 13px 0 8px;
+ accent-color: #52d9c4;
+ cursor: pointer;
+}
+
+.effect {
+ font-size: 11px;
+ line-height: 1.7;
+ color: #b0c3d6;
+ min-height: 36px;
+}
+
+.effect b { color: #6ce5cf; }
+
+.control.selected {
+ border-left: 2px solid #52d9c4;
+ padding-left: 11px;
+ margin-left: -13px;
+}
+
+.mini-divider {
+ height: 1px;
+ background: #ffffff18;
+ margin: 19px 0;
+}
+
+.bottom-actions {
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+}
+
+.bottom-actions button {
+ flex: 1;
+ padding: 10px 7px;
+}
+
+/* ===== 하단 결과 ===== */
+
+.results {
+ position: absolute;
+ bottom: 17px;
+ left: 22px;
+ right: 335px;
+ display: flex;
+ gap: 10px;
+ align-items: stretch;
+}
+
+.result {
+ min-width: 0;
+ flex: 1;
+ background: #071624dc;
+ border: 1px solid #36536b;
+ border-radius: 11px;
+ padding: 13px 16px;
+ backdrop-filter: blur(12px);
+}
+
+.result-name {
+ font-size: 10px;
+ color: #96aec4;
+ margin-bottom: 8px;
+}
+
+.result-number {
+ font-size: clamp(18px,2.3vw,28px);
+ font-weight: bold;
+ white-space: nowrap;
+}
+
+.result-unit {
+ color: #95afc2;
+ font-size: 11px;
+}
+
+#feedback {
+ position: absolute;
+ bottom: 112px;
+ left: 27px;
+ max-width: calc(100% - 365px);
+ background: #081725c9;
+ border-left: 3px solid #4dd8c0;
+ border-radius: 5px;
+ padding: 11px 14px;
+ font-size: 12px;
+ line-height: 1.6;
+ color: #bdebe3;
+}
+
+/* ===== 그래프 팝업 ===== */
+
+#graphPopup {
+ position: absolute;
+ left: 22px;
+ bottom: 108px;
+ width: min(460px, calc(100% - 360px));
+ height: 230px;
+ background: #0a1a2bea;
+ border: 1px solid #45647d;
+ border-radius: 11px;
+ padding: 16px;
+ pointer-events: auto;
+ backdrop-filter: blur(15px);
+}
+
+.graph-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ font-size: 12px;
+ margin-bottom: 12px;
+}
+
+#graph { width: 100%; height: 155px; }
+
+.graph-legend {
+ font-size: 10px;
+ color: #adc5d8;
+}
+
+@media(max-width: 820px) {
+ .topbar { padding: 0 12px; height: 58px; }
+ .sublogo { display: none; }
+
+ .story-box { left: 12px; right: 12px; padding: 16px; }
+
+ .panel {
+  top: auto;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  width: auto;
+  height: 245px;
+  padding: 13px;
+ }
+
+ .panel-heading { margin-bottom: 10px; }
+
+ .control {
+  margin-bottom: 11px;
+ }
+ .control input { margin: 5px 0 2px; }
+ .control .effect { display: none; }
+
+ .equation {
+  top: 68px;
+  width: calc(100% - 20px);
+  padding: 9px;
+ }
+ .eq-meaning { font-size: 10px; }
+ .chamber-label { top: 34%; font-size: 10px; }
+ .chamber-label.right { right: 12%; }
+ .chamber-label strong { font-size: 15px; }
+ .flow-label { display: none; }
+
+ .results {
+  bottom: 262px;
+  left: 8px;
+  right: 8px;
+  gap: 5px;
+ }
+ .result { padding: 8px; }
+ .result-name { font-size: 9px; }
+ .result-number { font-size: 16px; }
+ #feedback { display: none; }
+ #graphPopup {
+  left: 8px;
+  bottom: 270px;
+  width: calc(100% - 16px);
+  height: 180px;
+ }
+ #graph { height: 110px; }
 }
 </style>
 </head>
+
 <body>
+<div id="app">
 
-<div class="top">
- <div class="kicker">MARS EXPLORATION / INTERACTIVE CHEMISTRY</div>
- <h1>MOLECULAR PUMP LAB</h1>
- <div class="desc" id="topDescription">
-  화성 탐사선의 물 재활용 시스템에 문제가 발생했습니다.
- </div>
-</div>
+ <div id="scene"></div>
 
-<!-- 시작 화면 -->
-<div id="introScreen">
- <div id="viewport">
-  <div id="introUI">
-   <div class="ship-title">MISSION ARES / WATER RECOVERY SYSTEM</div>
-   <div class="chapter" id="chapter">PROLOGUE 01 / 07</div>
-   <div class="novel">
-    <div class="speaker" id="speaker">항해 시스템</div>
-    <div class="story-text" id="storyText"></div>
-    <div class="novel-actions">
-     <button id="skipStory">모두 스킵</button>
-     <button class="primary" id="nextStory">다음 대화 →</button>
-    </div>
-   </div>
+ <div class="topbar">
+  <div>
+   <div class="logo"><span>ARES</span> / MOLECULAR PUMP</div>
+   <div class="sublogo">MARS WATER RECOVERY MISSION</div>
   </div>
- </div>
- <div class="intro-footer">
-  3D 우주선 모델 · 마우스 드래그로 시점 변경 ·
-  실제 우주선이나 검증된 장비를 재현한 모델은 아닙니다.
- </div>
-</div>
-
-<!-- 실험실 -->
-<div id="gameUI" class="hidden">
-
- <div class="formula-panel">
-  <div class="formula-title">
-   CHEMISTRY EQUATIONS / 슬라이더와 연결된 화학 원리
-  </div>
-  <div class="formula-grid">
-
-   <div class="eq" id="eq-binding">
-    <div class="eq-name">① 분자 간 상호작용 · 포획과 해리</div>
-    <div class="eq-math">
-      k<sub>on</sub> ∝ e<sup>0.55B</sup>,
-      &nbsp;k<sub>off</sub> ∝ e<sup>−0.55B</sup>
-    </div>
-    <div class="eq-explain">
-     B는 결합 친화도를 나타내는 모형 변수야.
-     증가하면 이온을 잡기 쉬워지지만 놓기 어려워져.
-     <div class="eq-value" id="bindingResult"></div>
-    </div>
-   </div>
-
-   <div class="eq" id="eq-temp">
-    <div class="eq-name">② 활성화 에너지 · 온도와 반응속도</div>
-    <div class="eq-math">
-     k(T)=k(298) exp[−E<sub>a</sub>/R(1/T−1/298)]
-    </div>
-    <div class="eq-explain">
-     온도가 달라지면 상태 전이 속도도 달라져.
-     E<sub>a</sub>는 모형에서 18 kJ/mol로 가정해.
-     <div class="eq-value" id="tempResult"></div>
-    </div>
-   </div>
-
-   <div class="eq" id="eq-energy">
-    <div class="eq-name">③ 화학적 자유에너지 · 방향성 수송</div>
-    <div class="eq-math">
-     k<sub>+</sub>/k<sub>−</sub> =
-     exp(Δμ/RT)
-    </div>
-    <div class="eq-explain">
-     화학적 구동력이 전이의 방향성에 영향을 줘.
-     에너지가 없으면 농도 차에 따른 이동만 가능해.
-     <div class="eq-value" id="energyResult"></div>
-    </div>
-   </div>
-
+  <div class="top-actions">
+   <button id="homeBtn" class="hidden">처음으로</button>
+   <button id="fullBtn">⛶ 전체화면</button>
   </div>
  </div>
 
- <div class="workarea">
+ <!-- 3D 우주선 스토리 -->
+ <div id="storyLayer">
 
-  <div class="panel">
-   <div class="panel-head">01 / 실험 조건 조작</div>
-   <div class="controls">
+  <div class="scene-info" id="sceneInfo">
+   DEEP SPACE / CRUISE
+  </div>
 
-    <div class="control">
-     <div class="control-line">
-      <span>온도 T</span><span id="tempV"></span>
-     </div>
-     <input id="temp" type="range" min="278" max="338"
-       value="298" step="2">
-     <small>분자 상태 변화의 속도 조절</small>
-    </div>
+  <div class="story-progress" id="progress">
+   01 / 06
+  </div>
 
-    <div class="control">
-     <div class="control-line">
-      <span>결합 친화도 B</span><span id="bindingV"></span>
-     </div>
-     <input id="binding" type="range" min="-1" max="3"
-       value="1" step="0.1">
-     <small>이온 포획과 방출의 상대적인 속도 변경</small>
-    </div>
+  <div class="alert" id="alert">
+   WATER RECOVERY WARNING
+  </div>
 
-    <div class="control">
-     <div class="control-line">
-      <span>화학적 구동력 Δμ</span><span id="energyV"></span>
-     </div>
-     <input id="energy" type="range" min="0" max="12"
-       value="6" step="0.5">
-     <small>수송 방향을 유도하는 에너지 공급</small>
-    </div>
+  <div class="story-box">
+   <div class="speaker" id="speaker"></div>
+   <div class="story-text" id="storyText"></div>
 
-    <div class="control">
-     <div class="control-line">
-      <span>원수 초기 농도</span><span id="concV"></span>
-     </div>
-     <input id="conc" type="range" min="0.5" max="6"
-       value="3" step="0.5">
-     <small>정화할 물의 이온 농도</small>
-    </div>
-
-    <div class="control">
-     <div class="control-line">
-      <span>농축수 초기 농도비</span><span id="ratioV"></span>
-     </div>
-     <input id="ratio" type="range" min="0.1" max="3"
-       value="0.5" step="0.1">
-     <small>1보다 크면 농도 차에 역행하는 수송을 연구할 수 있어.</small>
-    </div>
-
-    <div class="control">
-     <div class="control-line">
-      <span>펌프 수</span><span id="countV"></span>
-     </div>
-     <input id="count" type="range" min="1" max="25"
-       value="9" step="1">
-     <small>동시에 작동하는 분자 펌프의 수</small>
-    </div>
-
-    <button id="reset" style="width:100%">처음 조건으로 다시 실험</button>
+   <div class="story-actions">
+    <button id="skip">모두 스킵</button>
+    <button class="primary" id="next">다음 →</button>
    </div>
+  </div>
+
+ </div>
+
+ <!-- 분자펌프 시뮬레이션 -->
+ <div id="labLayer" class="hidden">
+
+  <div class="equation">
+   <div class="eq-title" id="eqTitle">
+    CHEMICAL MODEL
+   </div>
+   <div class="eq-main" id="eqMain"></div>
+   <div class="eq-meaning" id="eqMeaning"></div>
+  </div>
+
+  <div class="chamber-label left">
+   원수
+   <strong id="leftText">3.00</strong>
+   mM
+  </div>
+
+  <div class="chamber-label right">
+   농축수
+   <strong id="rightText">1.00</strong>
+   mM
+  </div>
+
+  <div class="flow-label" id="flowText">
+   이온 수송 중
   </div>
 
   <div class="panel">
-   <div class="panel-head">02 / 3D 분자 펌프 · 실시간 동작</div>
-   <div class="stage">
-    <div class="stage-tag left">원수<br><b id="leftLabel"></b></div>
-    <div class="stage-tag right">농축수<br><b id="rightLabel"></b></div>
-    <div id="labMount"></div>
+   <div class="panel-heading">
+    분자 펌프 조작
    </div>
-   <div class="legend">
-    <span><i class="dot" style="background:#4dc9ff"></i>목표 이온</span>
-    <span><i class="dot" style="background:#c98aff"></i>분자 고리</span>
-    <span><i class="dot" style="background:#ffb464"></i>결합 자리</span>
-    <span><i class="dot" style="background:#52dabb"></i>분리막</span>
+
+   <div class="control" id="controlB">
+    <div class="control-top">
+     <span>결합 친화도</span>
+     <span class="control-value" id="valueB">1.0</span>
+    </div>
+    <input type="range" id="binding"
+           min="-1" max="3" step="0.1" value="1">
+    <div class="effect" id="effectB"></div>
    </div>
-   <div class="lab-actions">
-    <button class="primary" id="play">일시정지</button>
-    <button id="speed">속도 ×1</button>
-    <button id="csv">결과 CSV 저장</button>
+
+   <div class="control" id="controlE">
+    <div class="control-top">
+     <span>화학 에너지 공급</span>
+     <span class="control-value" id="valueE">6.0 kJ/mol</span>
+    </div>
+    <input type="range" id="energy"
+           min="0" max="12" step="0.5" value="6">
+    <div class="effect" id="effectE"></div>
    </div>
-   <div class="intro-footer">
-    드래그: 회전 · 휠: 확대 ·
-    표시된 입자 수는 계산 농도의 시각적 표현이야.
+
+   <div class="control" id="controlT">
+    <div class="control-top">
+     <span>온도</span>
+     <span class="control-value" id="valueT">298 K</span>
+    </div>
+    <input type="range" id="temp"
+           min="278" max="338" step="2" value="298">
+    <div class="effect" id="effectT"></div>
+   </div>
+
+   <div class="mini-divider"></div>
+
+   <div class="bottom-actions">
+    <button id="reset">초기화</button>
+    <button id="pause" class="primary">일시정지</button>
+    <button id="graphBtn">그래프</button>
    </div>
   </div>
 
-  <div class="panel">
-   <div class="panel-head">03 / 실시간 실험 결과</div>
-   <div class="stats">
-    <div class="stat">
-     <div class="stat-label">경과 시간</div>
-     <div class="stat-number"><span id="timeOut">0</span>
-      <span class="stat-unit">s</span></div>
+  <div id="feedback">
+   분자 펌프를 조작하면 이온의 포획·이동·방출이 달라져.
+  </div>
+
+  <div class="results">
+   <div class="result">
+    <div class="result-name">이온 제거율</div>
+    <div class="result-number">
+     <span id="removal">0.0</span><span class="result-unit">%</span>
     </div>
-    <div class="stat">
-     <div class="stat-label">원수 이온 제거율</div>
-     <div class="stat-number"><span id="removalOut">0</span>
-      <span class="stat-unit">%</span></div>
+   </div>
+   <div class="result">
+    <div class="result-name">순수송 속도</div>
+    <div class="result-number">
+     <span id="flux">0.000</span>
+     <span class="result-unit">mM/s</span>
     </div>
-    <div class="stat">
-     <div class="stat-label">오른쪽으로의 순간 순수송량</div>
-     <div class="stat-number"><span id="fluxOut">0</span>
-      <span class="stat-unit">mM/s</span></div>
-    </div>
-    <div class="stat">
-     <div class="stat-label">펌프 이온 점유율</div>
-     <div class="stat-number"><span id="occupancyOut">0</span>
-      <span class="stat-unit">%</span></div>
-    </div>
-    <div class="stat">
-     <div class="stat-label">누적 화학적 일의 추정값</div>
-     <div class="stat-number"><span id="workOut">0</span>
-      <span class="stat-unit">mJ</span></div>
-    </div>
-    <div class="stat">
-     <div class="stat-label">현재 순환 구동력</div>
-     <div class="stat-number"><span id="affinityOut">0</span>
-      <span class="stat-unit">kJ/mol</span></div>
+   </div>
+   <div class="result">
+    <div class="result-name">누적 화학 에너지 교환</div>
+    <div class="result-number">
+     <span id="work">0.00</span>
+     <span class="result-unit">mJ</span>
     </div>
    </div>
   </div>
 
- </div>
-
- <div class="details">
-  <div class="chart-box">
-   <div class="chart-heading">용액 농도의 시간 변화</div>
-   <canvas id="chart1"></canvas>
-   <div class="chart-note">
-    <span style="color:#49c8ff">●</span> 원수
+  <div id="graphPopup" class="hidden">
+   <div class="graph-header">
+    <b>이온 농도 변화</b>
+    <button id="closeGraph">닫기</button>
+   </div>
+   <canvas id="graph"></canvas>
+   <div class="graph-legend">
+    <span style="color:#53c8ff">●</span> 원수
     &nbsp;&nbsp;
-    <span style="color:#ffae70">●</span> 농축수
-    &nbsp; | &nbsp; 단위: mM
+    <span style="color:#ffb371">●</span> 농축수
+    &nbsp; (mM)
    </div>
   </div>
-  <div class="chart-box">
-   <div class="chart-heading">순수송량의 시간 변화</div>
-   <canvas id="chart2"></canvas>
-   <div class="chart-note">
-    <span style="color:#5be3b7">●</span>
-    농축수로 방출되는 순수송량 (mM/s)
-   </div>
-  </div>
+
  </div>
 
- <div class="learning">
-  <h3>04 / 이번 탐구에서 확인할 화학적 원리</h3>
-  <p>
-   <b>분자 간 상호작용:</b>
-   분자 펌프와 이온 사이의 결합 친화도가 달라지면
-   이온의 포획과 해리 속도도 달라진다.
-  </p>
-  <p>
-   <b>반응속도와 활성화 에너지:</b>
-   온도와 에너지 장벽이 상태 변화 속도에 영향을 주며,
-   포획이 빠르다고 해서 전체 수송이 반드시 빨라지지는 않는다.
-  </p>
-  <p>
-   <b>화학 변화와 에너지:</b>
-   외부 화학 에너지를 공급하면 농도 차에 거스르는
-   물질 수송도 가능해진다. 그러나 이를 위해서는
-   에너지 소모를 고려해야 한다.
-  </p>
-  <p>
-   <b>농도:</b>
-   원수에서 이온이 이동하면 농도가 감소하고,
-   농축수에서는 농도가 증가한다.
-   농도 차는 순수송 방향에도 영향을 미친다.
-  </p>
-  <p class="notice">
-   ※ 이 시뮬레이션은 미래 우주용 분자 펌프를 가정한
-   교육용 계산 모델이다. 실제 이온의 수화, 막의 전기적
-   중성, 이온 선택성, 실제 분자구조를 정량적으로
-   재현하지 않는다. 분자 고리의 3D 움직임은
-   계산된 상태 확률을 시각화한 것이다.
-  </p>
- </div>
 </div>
 
 <script type="module">
+
 import * as THREE from "three";
 import {OrbitControls} from
  "three/addons/controls/OrbitControls.js";
 
 const $ = id => document.getElementById(id);
-const R = 8.314;
-const TREF = 298;
-const SCALE = 0.012;
-const DT = 0.006;
 
-// ============================================
-// PART A. 텍스트 노벨
-// ============================================
+const R = 8.314;
+const REF = 298;
+const SCALE = 0.012;
+
+let mode = "story";
+let running = true;
+let storyIndex = 0;
+let elapsed = 0;
+let left = 3;
+let right = 1;
+let work = 0;
+let flux = 0;
+let states = [1,0,0,0];
+let history = [];
+let currentFocus = "B";
+
+// ===========================================
+// 1. Three.js 기본 환경
+// ===========================================
+
+const mount = $("scene");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060d18);
+
+const camera = new THREE.PerspectiveCamera(
+ 48,1,0.1,200
+);
+
+camera.position.set(11,6,18);
+
+const renderer = new THREE.WebGLRenderer({
+ antialias:true,
+ powerPreference:"high-performance"
+});
+
+renderer.setPixelRatio(
+ Math.min(window.devicePixelRatio,2)
+);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.35;
+
+mount.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera,renderer.domElement);
+controls.enableDamping = true;
+controls.enabled = false;
+controls.minDistance = 5;
+controls.maxDistance = 22;
+controls.enablePan = false;
+
+scene.add(new THREE.AmbientLight(0xffffff,1.6));
+
+const key = new THREE.DirectionalLight(0xc5e7ff,3);
+key.position.set(6,9,12);
+scene.add(key);
+
+const glowLight = new THREE.PointLight(0x49d8c7,35);
+glowLight.position.set(-4,2,5);
+scene.add(glowLight);
+
+function material(color,opacity=1,emissive=0x000000){
+ return new THREE.MeshPhongMaterial({
+  color,
+  emissive,
+  transparent:opacity<1,
+  opacity,
+  shininess:85,
+  depthWrite:opacity===1
+ });
+}
+
+function box(w,h,d,color){
+ return new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),
+  material(color)
+ );
+}
+
+function sphere(r,color){
+ return new THREE.Mesh(
+  new THREE.SphereGeometry(r,20,16),
+  material(color)
+ );
+}
+
+function cylinder(r,length,color){
+ return new THREE.Mesh(
+  new THREE.CylinderGeometry(r,r,length,20),
+  material(color)
+ );
+}
+
+// ===========================================
+// 2. 우주 배경
+// ===========================================
+
+const starPositions=[];
+
+for(let i=0;i<1500;i++){
+ const theta=Math.random()*Math.PI*2;
+ const z=Math.random()*2-1;
+ const radius=40+Math.random()*50;
+ const s=Math.sqrt(1-z*z);
+
+ starPositions.push(
+  radius*s*Math.cos(theta),
+  radius*z,
+  radius*s*Math.sin(theta)
+ );
+}
+
+const starGeometry=new THREE.BufferGeometry();
+starGeometry.setAttribute(
+ "position",
+ new THREE.Float32BufferAttribute(starPositions,3)
+);
+
+const stars=new THREE.Points(
+ starGeometry,
+ new THREE.PointsMaterial({
+  color:0xe0eeff,
+  size:0.15,
+  sizeAttenuation:true
+ })
+);
+
+scene.add(stars);
+
+const mars=sphere(4,0xb65f42);
+mars.position.set(-17,-8,-30);
+scene.add(mars);
+
+// ===========================================
+// 3. 3D 우주선 모델
+// ===========================================
+
+const ship=new THREE.Group();
+scene.add(ship);
+
+const hull=cylinder(0.72,5.6,0x9cb4c8);
+hull.rotation.z=Math.PI/2;
+ship.add(hull);
+
+const nose=new THREE.Mesh(
+ new THREE.ConeGeometry(0.72,1.7,30),
+ material(0xe0eef5)
+);
+nose.rotation.z=-Math.PI/2;
+nose.position.x=3.6;
+ship.add(nose);
+
+const frontBand=cylinder(0.76,0.23,0x3e6780);
+frontBand.rotation.z=Math.PI/2;
+frontBand.position.x=2.4;
+ship.add(frontBand);
+
+// 태양광 패널
+for(const direction of [-1,1]){
+ const panel=box(2.6,0.08,3.3,0x214b80);
+ panel.position.set(-.3,0,direction*2.9);
+ ship.add(panel);
+
+ const frame=new THREE.LineSegments(
+  new THREE.EdgesGeometry(panel.geometry),
+  new THREE.LineBasicMaterial({color:0x81b9e0})
+ );
+ frame.position.copy(panel.position);
+ ship.add(frame);
+
+ for(let i=-2;i<=2;i++){
+  const line=box(0.025,0.09,3.25,0x608abb);
+  line.position.set(-.3+i*.48,.05,direction*2.9);
+  ship.add(line);
+ }
+
+ const support=box(.12,.12,1.5,0x9db9ce);
+ support.position.set(-.3,0,direction*1.2);
+ ship.add(support);
+}
+
+// 엔진
+for(const z of [-.42,.42]){
+ const engine=cylinder(.24,.75,0x3e5c73);
+ engine.rotation.z=Math.PI/2;
+ engine.position.set(-3.05,-.15,z);
+ ship.add(engine);
+
+ const flame=new THREE.Mesh(
+  new THREE.ConeGeometry(.2,1.2,20),
+  new THREE.MeshBasicMaterial({
+   color:0x64d6ff,transparent:true,opacity:.65
+  })
+ );
+ flame.rotation.z=Math.PI/2;
+ flame.position.set(-3.85,-.15,z);
+ ship.add(flame);
+}
+
+// 정화 모듈
+const waterModule=box(1.1,1.0,1.25,0x208caa);
+waterModule.position.set(-1.15,.88,0);
+ship.add(waterModule);
+
+const waterGlow=new THREE.Mesh(
+ new THREE.BoxGeometry(1.17,1.07,1.32),
+ new THREE.MeshBasicMaterial({
+  color:0x4ad9ef,
+  transparent:true,
+  opacity:0.07
+ })
+);
+waterGlow.position.copy(waterModule.position);
+ship.add(waterGlow);
+
+// 경고등
+const warningLamp=sphere(.19,0xff4a4f);
+warningLamp.position.set(-1.15,1.53,0);
+ship.add(warningLamp);
+
+const lampMaterial=new THREE.MeshBasicMaterial({
+ color:0xff4444
+});
+warningLamp.material=lampMaterial;
+
+// 안테나
+const antenna=cylinder(.035,1.2,0xc4d9e4);
+antenna.position.set(1,1,0);
+ship.add(antenna);
+
+const dish=new THREE.Mesh(
+ new THREE.ConeGeometry(.5,.25,24),
+ material(0xd5e5ee)
+);
+dish.position.set(1,1.65,0);
+ship.add(dish);
+
+// 정화 모듈에서 발생한 문제를 나타내는 입자
+const problemParticles=[];
+
+for(let i=0;i<22;i++){
+ const particle=sphere(.045,0xff6666);
+ particle.position.set(
+  -1.15+(Math.random()-.5)*.8,
+  1+(Math.random()-.5)*.8,
+  (Math.random()-.5)*.8
+ );
+ ship.add(particle);
+ problemParticles.push(particle);
+}
+
+// ===========================================
+// 4. 움직이는 스토리
+// ===========================================
 
 const story = [
  {
-  who:"항해 시스템 / ARES",
-  text:"서기 2042년. 화성을 향해 항해 중인 탐사선 ARES.\n승무원들은 지구에서 가져온 제한된 물을 반복적으로 회수하고 재활용하고 있다."
+  speaker:"항해 시스템 / ARES",
+  text:"화성 도착까지 173일.\n탐사선은 제한된 물을 회수하며 항해를 이어가고 있었다.",
+  info:"DEEP SPACE / CRUISE",
+  camera:[12,7,19],
+  target:[0,0,0],
+  alarm:false
  },
  {
-  who:"항해 시스템 / 경고",
-  text:"[주의] 물 재활용 모듈의 이온 제거 성능 저하가 감지되었습니다.\n회수된 물속의 용존 이온 농도가 설정된 기준을 초과했습니다."
+  speaker:"항해 시스템 / 경고",
+  text:"경고. 물 재활용 장치의 이온 제거 성능이 저하되었습니다.\n회수된 물의 용존 이온 농도가 기준을 초과했습니다.",
+  info:"WATER SYSTEM / WARNING",
+  camera:[8,4,11],
+  target:[-1,0.6,0],
+  alarm:true
  },
  {
-  who:"탑재 화학 연구원",
-  text:"물을 되찾는 것만으로는 충분하지 않아.\n용해된 이온은 물 분자와 상호작용하며 용액 속에 남아 있어. 이를 분리하려면 추가적인 정화 과정이 필요하지."
+  speaker:"탑재 화학 연구원",
+  text:"이온은 물 분자와 상호작용하며 용액에 남아 있어.\n따라서 물을 회수한 뒤에도 별도의 이온 제거가 필요하지.",
+  info:"WATER RECOVERY / ANALYSIS",
+  camera:[5,3,6.5],
+  target:[-1.15,.85,0],
+  alarm:true
  },
  {
-  who:"탑재 화학 연구원",
-  text:"역삼투나 이온 교환 같은 기술로 이온을 제거할 수 있지만, 장치의 압력 조건과 소모품, 재생 과정 등을 고려해야 해.\n이번 임무에서는 새로운 보조 정화 기술도 검토하기로 했어."
+  speaker:"탑재 화학 연구원",
+  text:"기존 분리 장치는 압력이나 소모품 관리가 필요해.\n우리는 새로운 보조 정화 방법을 시험하려고 해.",
+  info:"ENGINEERING / ALTERNATIVE",
+  camera:[5,2.3,5.5],
+  target:[-1.15,.9,0],
+  alarm:false
  },
  {
-  who:"항해 시스템 / 연구 제안",
-  text:"제안 기술: 선택적 분자 펌프.\n특정 이온과 결합하는 분자기계를 가정하고, 화학적 에너지를 공급해 이온을 한쪽으로 이동시키는 방법이야."
+  speaker:"항해 시스템 / 분자 펌프 제안",
+  text:"특정 이온을 붙잡고, 화학 에너지를 이용해 이동시킨 뒤 방출하는 분자 펌프.\n이 원리를 물 재활용 장치에 적용할 수 있을까?",
+  info:"MOLECULAR PUMP / PROPOSAL",
+  camera:[5,4,8],
+  target:[-1.15,.8,0],
+  alarm:false
  },
  {
-  who:"탑재 화학 연구원",
-  text:"하지만 결합이 강하다고 무조건 좋은 건 아니야.\n이온을 너무 약하게 붙잡으면 포획에 실패하고, 너무 강하게 붙잡으면 방출하기 어려울 수 있어. 온도와 공급 에너지까지 고려해야 하지."
- },
- {
-  who:"항해 시스템 / 실험 시작",
-  text:"분자 펌프의 작동을 계산 모델로 시험하겠습니다.\n온도, 결합 친화도, 화학 에너지, 이온 농도를 직접 조절하여 어떤 조건에서 수송이 유리한지 확인해 주세요."
+  speaker:"탑재 화학 연구원",
+  text:"결합 세기, 에너지, 온도를 직접 바꿔 보자.\n분자 펌프가 이온을 얼마나 잘 옮기는지 확인하는 거야.",
+  info:"EXPERIMENT / READY",
+  camera:[9,5,12],
+  target:[0,0,0],
+  alarm:false
  }
 ];
 
-let storyIndex = 0;
-let mode = "intro";
+let cameraGoal=new THREE.Vector3(12,7,19);
+let targetGoal=new THREE.Vector3();
 
-function renderStory(){
- const s = story[storyIndex];
- $("speaker").textContent = s.who;
- $("storyText").textContent = s.text;
- $("chapter").textContent =
-  `PROLOGUE ${String(storyIndex+1).padStart(2,"0")} / 07`;
- $("nextStory").textContent =
-  storyIndex === story.length-1 ? "실험실 입장 →" : "다음 대화 →";
+function showStory(){
+ const s=story[storyIndex];
+
+ $("speaker").textContent=s.speaker;
+ $("storyText").textContent=s.text;
+ $("sceneInfo").textContent=s.info;
+ $("progress").textContent=
+  String(storyIndex+1).padStart(2,"0")+" / 06";
+
+ $("next").textContent=
+  storyIndex===story.length-1 ?
+  "시뮬레이션 시작 →" : "다음 →";
+
+ $("alert").classList.toggle("visible",s.alarm);
+
+ cameraGoal.set(...s.camera);
+ targetGoal.set(...s.target);
+
+ warningLamp.visible=s.alarm;
+ problemParticles.forEach(p=>p.visible=s.alarm);
 }
 
-$("nextStory").onclick = () => {
- if(storyIndex < story.length-1){
+$("next").onclick=()=>{
+ if(storyIndex<story.length-1){
   storyIndex++;
-  renderStory();
+  showStory();
  } else {
   enterLab();
  }
 };
-$("skipStory").onclick = enterLab;
 
-function enterLab(){
- mode = "lab";
- $("introScreen").classList.add("hidden");
- $("gameUI").classList.remove("hidden");
- $("topDescription").textContent =
-  "우주 물 재활용 실험 · 화학 변인을 조작하여 분자 펌프의 작동을 분석하세요.";
- setupLab();
- setTimeout(()=>{
-  resizeLab();
-  drawCharts();
- },80);
+$("skip").onclick=enterLab;
+
+// ===========================================
+// 5. 3D 실험실 구성
+// ===========================================
+
+const lab=new THREE.Group();
+lab.visible=false;
+scene.add(lab);
+
+const membrane=new THREE.Mesh(
+ new THREE.BoxGeometry(.16,5.4,6.2),
+ material(0x48ceb4,.22)
+);
+lab.add(membrane);
+
+// 막의 테두리
+const membraneEdges=new THREE.LineSegments(
+ new THREE.EdgesGeometry(
+  new THREE.BoxGeometry(.2,5.4,6.2)
+ ),
+ new THREE.LineBasicMaterial({color:0x57d9c1})
+);
+lab.add(membraneEdges);
+
+// 수조 경계
+for(const x of [-2.2,2.2]){
+ const boundary=new THREE.LineSegments(
+  new THREE.EdgesGeometry(
+   new THREE.BoxGeometry(4.3,5.5,6.4)
+  ),
+  new THREE.LineBasicMaterial({
+   color:0x53718b,
+   transparent:true,
+   opacity:.50
+  })
+ );
+ boundary.position.x=x;
+ lab.add(boundary);
 }
 
-// ============================================
-// PART B. Three.js 공통 도구
-// ============================================
+const pumps=[];
 
-function material(color,opacity=1){
- return new THREE.MeshPhongMaterial({
-  color,
-  transparent:opacity<1,
-  opacity,
-  shininess:80,
-  depthWrite:opacity===1
+// 분자 펌프 12개
+for(let i=0;i<12;i++){
+ const group=new THREE.Group();
+ const row=Math.floor(i/4);
+ const col=i%4;
+
+ group.position.set(
+  0,(row-1)*1.45,(col-1.5)*1.45
+ );
+
+ const axle=cylinder(.07,1.5,0xb7cbd9);
+ axle.rotation.z=Math.PI/2;
+ group.add(axle);
+
+ const leftSite=sphere(.15,0xf5aa54);
+ leftSite.position.x=-.45;
+ group.add(leftSite);
+
+ const rightSite=sphere(.15,0x49ddb8);
+ rightSite.position.x=.45;
+ group.add(rightSite);
+
+ const ring=new THREE.Mesh(
+  new THREE.TorusGeometry(.25,.075,12,30),
+  material(0xc18af5)
+ );
+ ring.rotation.y=Math.PI/2;
+ group.add(ring);
+
+ const cargo=sphere(.12,0x45c9ff);
+ group.add(cargo);
+
+ lab.add(group);
+
+ pumps.push({
+  group,ring,cargo,
+  state:0,
+  phase:Math.random()*6.28,
+  pulse:0
  });
 }
-function meshBox(w,h,d,color){
- return new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color));
-}
-function ball(radius,color){
- return new THREE.Mesh(
-  new THREE.SphereGeometry(radius,16,12),
-  material(color)
+
+// 이온 입자들
+const leftParticles=[];
+const rightParticles=[];
+
+function addIon(side){
+ const obj=sphere(.085,
+  side==="L" ? 0x4bc8ff : 0xffb16e
  );
-}
-function cylinder(radius,length,color){
- return new THREE.Mesh(
-  new THREE.CylinderGeometry(radius,radius,length,16),
-  material(color)
+
+ obj.position.set(
+  (side==="L"?-1:1)*(.3+Math.random()*3.7),
+  (Math.random()-.5)*5,
+  (Math.random()-.5)*5.8
  );
-}
-function lighting(scene){
- scene.add(new THREE.AmbientLight(0xffffff,1.2));
- const key = new THREE.DirectionalLight(0xc3eaff,2.3);
- key.position.set(5,9,8);
- scene.add(key);
- const fill = new THREE.PointLight(0x3ccbbd,24);
- fill.position.set(-5,2,5);
- scene.add(fill);
-}
 
-// ============================================
-// PART C. 프롤로그 3D 우주선
-// ============================================
-
-const introMount = $("viewport");
-const shipScene = new THREE.Scene();
-shipScene.background = new THREE.Color(0x060c18);
-
-const shipCamera = new THREE.PerspectiveCamera(46,1,0.1,150);
-shipCamera.position.set(9,5,11);
-
-const shipRenderer = new THREE.WebGLRenderer({antialias:true});
-shipRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
-shipRenderer.outputColorSpace = THREE.SRGBColorSpace;
-introMount.prepend(shipRenderer.domElement);
-lighting(shipScene);
-
-const shipControls = new OrbitControls(shipCamera,shipRenderer.domElement);
-shipControls.enableDamping=true;
-shipControls.enablePan=false;
-shipControls.minDistance=6;
-shipControls.maxDistance=25;
-
-const spacecraft = new THREE.Group();
-shipScene.add(spacecraft);
-
-// 동체: 길이 방향 X
-const body = cylinder(0.68,5.0,0xa7bbc9);
-body.rotation.z=Math.PI/2;
-spacecraft.add(body);
-
-// 전방 원뿔
-const nose = new THREE.Mesh(
- new THREE.ConeGeometry(0.68,1.6,24),
- material(0xddebf5)
-);
-nose.rotation.z=-Math.PI/2;
-nose.position.x=3.25;
-spacecraft.add(nose);
-
-// 후방 엔진
-for(const z of [-0.35,0.35]){
- const engine=cylinder(0.24,0.65,0x45647d);
- engine.rotation.z=Math.PI/2;
- engine.position.set(-2.8,-0.1,z);
- spacecraft.add(engine);
- const glow=ball(0.20,0x5bdfff);
- glow.position.set(-3.2,-0.1,z);
- spacecraft.add(glow);
-}
-
-// 태양전지판
-for(const z of [-2.7,2.7]){
- const panel=meshBox(2.25,0.08,3.4,0x1b4e86);
- panel.position.set(-0.3,0,z);
- spacecraft.add(panel);
-
- const border=new THREE.LineSegments(
-  new THREE.EdgesGeometry(panel.geometry),
-  new THREE.LineBasicMaterial({color:0x66a8d5})
+ obj.userData.velocity=new THREE.Vector3(
+  (Math.random()-.5)*.025,
+  (Math.random()-.5)*.025,
+  (Math.random()-.5)*.025
  );
- border.position.copy(panel.position);
- spacecraft.add(border);
 
- for(let i=-1;i<=1;i++){
-  const stripe=meshBox(0.025,0.09,3.3,0x477ab3);
-  stripe.position.set(-0.3+i*0.65,0.05,z);
-  spacecraft.add(stripe);
- }
- const support=cylinder(0.045,1.25,0xc2d0db);
- support.rotation.x=Math.PI/2;
- support.position.set(-0.3,0,z>0?0.8:-0.8);
- spacecraft.add(support);
+ lab.add(obj);
+ return obj;
 }
 
-// 회전 모듈을 나타내는 고리
-const ringHab=new THREE.Mesh(
- new THREE.TorusGeometry(1.12,0.17,14,48),
- material(0x89a6bc)
-);
-ringHab.rotation.y=Math.PI/2;
-ringHab.position.x=-1.1;
-spacecraft.add(ringHab);
-
-// 통신 안테나
-const dish=new THREE.Mesh(
- new THREE.ConeGeometry(0.52,0.24,24),
- material(0xf3f0dc)
-);
-dish.position.set(0.9,1.1,0);
-spacecraft.add(dish);
-const antenna=cylinder(0.045,1.0,0xc7dce8);
-antenna.position.set(0.9,0.75,0);
-spacecraft.add(antenna);
-
-// 별 배경
-const starsGeom=new THREE.BufferGeometry();
-const stars=[];
-for(let i=0;i<900;i++){
- const a=Math.random()*Math.PI*2;
- const z=Math.random()*2-1;
- const r=45+Math.random()*25;
- const q=Math.sqrt(1-z*z);
- stars.push(r*q*Math.cos(a),r*z,r*q*Math.sin(a));
+for(let i=0;i<90;i++){
+ leftParticles.push(addIon("L"));
+ rightParticles.push(addIon("R"));
 }
-starsGeom.setAttribute(
- "position",new THREE.Float32BufferAttribute(stars,3)
-);
-const starPoints=new THREE.Points(
- starsGeom,
- new THREE.PointsMaterial({
-  color:0xdde8ff,size:0.14,sizeAttenuation:true
- })
-);
-shipScene.add(starPoints);
 
-// 화성
-const mars=ball(2.3,0xb85839);
-mars.position.set(-11,-5,-17);
-shipScene.add(mars);
+// ===========================================
+// 6. 화학 계산 모델
+// ===========================================
 
-// ============================================
-// PART D. 화학 계산 모델
-// ============================================
-
-let running=true;
-let speed=1;
-let time=0, left=3, right=1.5, initialLeft=3;
-let work=0, flux=0;
-let state=[1,0,0,0];
-let history=[];
-let lastSample=0;
+// 교육용 4상태 모형
+//
+// 0: 왼쪽에서 이온을 기다리는 펌프
+// 1: 이온 포획
+// 2: 오른쪽으로 이동
+// 3: 이온 방출 후 초기화
+//
+// 0 → 1 → 2 → 3 → 0
+//
+// 모든 과정에는 역반응이 존재한다.
+// 화학적 구동력은 1 ↔ 2 전이에 작용한다.
+//
+// 모델의 계수는 실제 장치의 측정값이 아닌 가정값이다.
 
 function params(){
  return {
-  T:+$("temp").value,
   B:+$("binding").value,
   E:+$("energy").value,
-  C:+$("conc").value,
-  ratio:+$("ratio").value,
-  N:+$("count").value
+  T:+$("temp").value
  };
 }
-
-// 상태 0: 빈 펌프, 원수 쪽
-// 상태 1: 원수 이온 포획
-// 상태 2: 이온의 막 반대편 이동
-// 상태 3: 이온 방출 뒤 빈 펌프
-//
-// 순환: 0 -> 1 -> 2 -> 3 -> 0
-// 역방향 전이도 모두 허용한다.
-//
-// 모형의 평형 상수와 상태 전이는
-// 교육용 가정으로 설정한다.
 
 function rates(){
  const p=params();
+
  const thermal=Math.exp(
-  -18000/R*(1/p.T-1/TREF)
+  -18000/R*(1/p.T-1/REF)
  );
 
- const kon=0.15*Math.exp(0.55*p.B)*thermal;
- const koff=0.50*Math.exp(-0.55*p.B)*thermal;
- const trans=0.65*Math.exp(-0.08*p.B*p.B)*thermal;
- const reset=0.8*thermal;
+ const kon=.15*Math.exp(.55*p.B)*thermal;
+ const koff=.50*Math.exp(-.55*p.B)*thermal;
+
+ const move=.65*
+  Math.exp(-.08*p.B*p.B)*thermal;
+
+ const reset=.8*thermal;
  const drive=p.E*1000/(2*R*p.T);
 
  return {
-  forward:[
+  f:[
    kon*left,
-   trans*Math.exp(drive),
+   move*Math.exp(drive),
    koff,
    reset
   ],
-  reverse:[
+  b:[
    koff,
-   trans*Math.exp(-drive),
+   move*Math.exp(-drive),
    kon*right,
    reset
   ],
-  thermal,kon,koff
+  kon,koff,thermal
  };
 }
 
-function step(dt){
- const p=params();
+function chemistryStep(dt){
  const rt=rates();
  const f=[],b=[];
 
  for(let i=0;i<4;i++){
-  f[i]=state[i]*rt.forward[i];
-  b[i]=state[(i+1)%4]*rt.reverse[i];
+  f[i]=states[i]*rt.f[i];
+  b[i]=states[(i+1)%4]*rt.b[i];
  }
 
- // 현재 상태에 존재하는 확률 이상이
- // 한 번에 유출되지 않도록 제한
+ // 확률 유출량 제한
  for(let i=0;i<4;i++){
-  const prev=(i+3)%4;
-  const out=f[i]+b[prev];
-  if(out*dt>state[i]&&out>0){
-   const scale=state[i]/(out*dt);
-   f[i]*=scale;
-   b[prev]*=scale;
+  const previous=(i+3)%4;
+  const out=f[i]+b[previous];
+
+  if(out*dt>states[i] && out>0){
+   const q=states[i]/(out*dt);
+   f[i]*=q;
+   b[previous]*=q;
   }
  }
 
- // 저장조의 이온 보존
- const useL=f[0]*p.N*SCALE*dt;
- if(useL>left&&useL>0)f[0]*=left/useL;
+ // 저장조의 음수 농도 방지
+ const leftUse=f[0]*12*SCALE*dt;
+ if(leftUse>left && leftUse>0){
+  f[0]*=left/leftUse;
+ }
 
- const useR=b[2]*p.N*SCALE*dt;
- if(useR>right&&useR>0)b[2]*=right/useR;
+ const rightUse=b[2]*12*SCALE*dt;
+ if(rightUse>right && rightUse>0){
+  b[2]*=right/rightUse;
+ }
 
- const delta=[0,0,0,0];
+ const d=[0,0,0,0];
 
  for(let i=0;i<4;i++){
-  const next=(i+1)%4;
-  const amount=(f[i]-b[i])*dt;
-  delta[i]-=amount;
-  delta[next]+=amount;
+  const j=(i+1)%4;
+  const net=(f[i]-b[i])*dt;
+  d[i]-=net;
+  d[j]+=net;
  }
 
  for(let i=0;i<4;i++){
-  state[i]=Math.max(0,state[i]+delta[i]);
+  states[i]=Math.max(0,states[i]+d[i]);
  }
 
- const sum=state.reduce((a,b)=>a+b,0);
- state=state.map(x=>x/sum);
+ const total=states.reduce((a,b)=>a+b,0);
+ states=states.map(x=>x/total);
 
  left=Math.max(0,
-  left-(f[0]-b[0])*p.N*SCALE*dt
+  left-(f[0]-b[0])*12*SCALE*dt
  );
+
  right=Math.max(0,
-  right+(f[2]-b[2])*p.N*SCALE*dt
+  right+(f[2]-b[2])*12*SCALE*dt
  );
 
- flux=(f[2]-b[2])*p.N*SCALE;
+ flux=(f[2]-b[2])*12*SCALE;
 
- // 화학 구동 전이의 순반응 진행량을
- // 이용한 이상적 화학적 일
- work+=(f[1]-b[1])*p.N*SCALE*dt*p.E;
+ // 1 L 기준의 이상적인 화학적 일 교환 추정
+ work+=(f[1]-b[1])*12*SCALE*dt*params().E;
 
- time+=dt;
+ elapsed+=dt;
 }
 
 function reset(){
- const p=params();
- time=0;
- left=p.C;
- right=p.C*p.ratio;
- initialLeft=left;
- state=[1,0,0,0];
+ elapsed=0;
+ left=3;
+ right=1;
  work=0;
  flux=0;
+ states=[1,0,0,0];
  history=[];
- lastSample=0;
- updateLabels();
- updateNumbers();
- sample();
- syncParticles();
- drawCharts();
-}
-
-function updateLabels(){
- const p=params();
- $("tempV").textContent=p.T+" K";
- $("bindingV").textContent=p.B.toFixed(1);
- $("energyV").textContent=p.E.toFixed(1)+" kJ/mol";
- $("concV").textContent=p.C.toFixed(1)+" mM";
- $("ratioV").textContent=p.ratio.toFixed(1);
- $("countV").textContent=p.N;
-
- const rt=rates();
- $("bindingResult").textContent=
-  "포획 계수: "+rt.kon.toFixed(3)+
-  " / 해리 계수: "+rt.koff.toFixed(3);
- $("tempResult").textContent=
-  "298 K 대비 전이속도 배율: "+
-  rt.thermal.toFixed(2)+"배";
- $("energyResult").textContent=
-  "정·역방향 전이 비: "+
-  Math.exp(p.E*1000/(R*p.T)).toFixed(2)+"배";
-}
-
-function updateNumbers(){
- const p=params();
- const removal=100*(initialLeft-left)/initialLeft;
- const affinity=p.E-
-  R*p.T/1000*Math.log(
-   Math.max(right,1e-9)/Math.max(left,1e-9)
-  );
-
- $("timeOut").textContent=time.toFixed(1);
- $("removalOut").textContent=removal.toFixed(1);
- $("fluxOut").textContent=flux.toFixed(3);
- $("occupancyOut").textContent=
-  (100*(state[1]+state[2])).toFixed(1);
- $("workOut").textContent=work.toFixed(3);
- $("affinityOut").textContent=affinity.toFixed(2);
- $("leftLabel").textContent=left.toFixed(2)+" mM";
- $("rightLabel").textContent=right.toFixed(2)+" mM";
-}
-
-function sample(){
- history.push({
-  t:time,
-  left,right,flux,work,
-  occupied:state[1]+state[2]
+ pumps.forEach(p=>{
+  p.state=0;
+  p.ring.position.x=-.65;
  });
- if(history.length>650)history.shift();
+ record();
+ updateUI();
+ updateParticles();
 }
 
-// ============================================
-// PART E. 분자 펌프 3D 환경
-// ============================================
+// ===========================================
+// 7. 화학식과 조작 결과 연결
+// ===========================================
 
-let labReady=false;
-let labScene,labCamera,labRenderer,labControls;
-const pumpObjects=[];
-const leftIons=[],rightIons=[];
-let labClock=0;
+function focusEquation(which){
+ currentFocus=which;
 
-function setupLab(){
- if(labReady)return;
- labReady=true;
-
- const mount=$("labMount");
- labScene=new THREE.Scene();
- labScene.background=new THREE.Color(0x091522);
- labCamera=new THREE.PerspectiveCamera(48,1,0.1,100);
- labCamera.position.set(8,6,11);
-
- labRenderer=new THREE.WebGLRenderer({antialias:true});
- labRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
- labRenderer.outputColorSpace=THREE.SRGBColorSpace;
- mount.appendChild(labRenderer.domElement);
-
- labControls=new OrbitControls(
-  labCamera,labRenderer.domElement
- );
- labControls.enableDamping=true;
- labControls.minDistance=5;
- labControls.maxDistance=23;
-
- lighting(labScene);
-
- // 저장조 경계
- for(const x of [-2.1,2.1]){
-  const box=new THREE.BoxGeometry(4.1,5.3,6.3);
-  const edges=new THREE.EdgesGeometry(box);
-  const line=new THREE.LineSegments(
-   edges,
-   new THREE.LineBasicMaterial({
-    color:0x557189,transparent:true,opacity:0.55
-   })
+ ["B","E","T"].forEach(id=>{
+  $("control"+id).classList.toggle(
+   "selected",id===which
   );
-  line.position.x=x;
-  labScene.add(line);
- }
+ });
 
- // 반투명 막
- const membrane=new THREE.Mesh(
-  new THREE.BoxGeometry(0.12,5.3,6.3),
-  new THREE.MeshPhongMaterial({
-   color:0x2bb99a,transparent:true,
-   opacity:0.17,depthWrite:false
-  })
- );
- labScene.add(membrane);
-
- // 분자 펌프: 축과 이동하는 고리
- for(let i=0;i<25;i++){
-  const row=Math.floor(i/5);
-  const col=i%5;
-
-  const group=new THREE.Group();
-  group.position.set(
-   0,(row-2)*1.04,(col-2)*1.2
-  );
-
-  const axle=cylinder(0.065,1.4,0xa7bbd0);
-  axle.rotation.z=Math.PI/2;
-  group.add(axle);
-
-  const site1=ball(0.13,0xffb464);
-  site1.position.x=-0.4;
-  group.add(site1);
-
-  const site2=ball(0.13,0x5ce2b7);
-  site2.position.x=0.4;
-  group.add(site2);
-
-  const ring=new THREE.Mesh(
-   new THREE.TorusGeometry(0.22,0.065,12,30),
-   material(0xc98aff)
-  );
-  ring.rotation.y=Math.PI/2;
-  group.add(ring);
-
-  const cargo=ball(0.10,0x4dc9ff);
-  group.add(cargo);
-
-  labScene.add(group);
-  pumpObjects.push({
-   group,ring,cargo,
-   phase:Math.random()*6.28,
-   state:0
-  });
- }
-
- function newIon(color,side){
-  const obj=ball(0.085,color);
-  obj.userData={
-   vx:(Math.random()-.5)*0.018,
-   vy:(Math.random()-.5)*0.018,
-   vz:(Math.random()-.5)*0.018
-  };
-  obj.position.set(
-   (side==="L"?-1:1)*(0.3+Math.random()*3.7),
-   (Math.random()-.5)*4.8,
-   (Math.random()-.5)*5.8
-  );
-  labScene.add(obj);
-  return obj;
- }
-
- for(let i=0;i<100;i++){
-  leftIons.push(newIon(0x4dc9ff,"L"));
-  rightIons.push(newIon(0xffb470,"R"));
- }
-
- resizeLab();
- syncParticles();
+ updateEquation();
 }
 
-function syncParticles(){
- if(!labReady)return;
+function updateEquation(){
+ const p=params();
+ const rt=rates();
 
- const nL=Math.min(100,Math.round(left*17));
- const nR=Math.min(100,Math.round(right*17));
+ $("valueB").textContent=p.B.toFixed(1);
+ $("valueE").textContent=p.E.toFixed(1)+" kJ/mol";
+ $("valueT").textContent=p.T+" K";
 
- leftIons.forEach((o,i)=>o.visible=i<nL);
- rightIons.forEach((o,i)=>o.visible=i<nR);
+ $("effectB").innerHTML=
+  `포획 계수 <b>${rt.kon.toFixed(2)}</b> · `+
+  `해리 계수 <b>${rt.koff.toFixed(2)}</b>`;
+
+ $("effectE").innerHTML=
+  `이동 전이의 정·역방향 속도비 `+
+  `<b>${Math.exp(p.E*1000/(R*p.T)).toFixed(1)}배</b>`;
+
+ $("effectT").innerHTML=
+  `298 K 대비 반응속도 계수 `+
+  `<b>${rt.thermal.toFixed(2)}배</b>`;
+
+ if(currentFocus==="B"){
+  $("eqTitle").textContent=
+   "결합 친화도 · 포획과 해리";
+  $("eqMain").innerHTML=
+   "k<sub>on</sub> ∝ e<sup>0.55B</sup> &nbsp;"+
+   "k<sub>off</sub> ∝ e<sup>−0.55B</sup>";
+  $("eqMeaning").textContent=
+   "B 증가 → 이온 포획은 쉬워지고, 방출은 느려지는 모형";
+ }
+ else if(currentFocus==="E"){
+  $("eqTitle").textContent=
+   "화학적 구동력 · 분자 이동";
+  $("eqMain").innerHTML=
+   "k<sub>+</sub>/k<sub>−</sub> = "+
+   "exp(Δμ / RT)";
+  $("eqMeaning").textContent=
+   "에너지 공급 증가 → 막 통과 전이의 정방향 비율 증가";
+ }
+ else {
+  $("eqTitle").textContent=
+   "온도 · 활성화 에너지";
+  $("eqMain").innerHTML=
+   "k(T) = k(298) exp[−E<sub>a</sub>/R"+
+   "(1/T − 1/298)]";
+  $("eqMeaning").textContent=
+   "온도 변화 → 포획·이동·방출의 반응속도 변화";
+ }
 }
 
-function animateParticles(arr,side){
- const thermal=Math.sqrt(params().T/TREF);
+function feedback(){
+ const p=params();
+
+ if(currentFocus==="B"){
+  $("feedback").textContent=
+   p.B>2 ?
+   "결합이 강해 이온을 잡기 쉽지만, 놓는 과정이 느려질 수 있어." :
+   p.B<0 ?
+   "결합이 약해서 이온을 포획하기 어려운 조건이야." :
+   "포획과 방출이 경쟁하고 있어. 결합 세기를 바꿔 비교해 봐.";
+ }
+ else if(currentFocus==="E"){
+  $("feedback").textContent=
+   p.E===0 ?
+   "외부 화학 구동력이 없어. 농도 차에 따른 이동을 관찰해 봐." :
+   "화학 에너지가 막 통과 단계의 방향성을 바꾸고 있어.";
+ }
+ else {
+  $("feedback").textContent=
+   p.T>315 ?
+   "온도가 높아져 전이속도가 증가했어. 전체 정화율도 확인해 봐." :
+   p.T<290 ?
+   "온도가 낮아 전이속도가 느려졌어." :
+   "온도에 따라 활성화 장벽을 넘는 전이속도가 달라져.";
+ }
+}
+
+$("binding").addEventListener("input",()=>{
+ focusEquation("B");
+ feedback();
+});
+
+$("energy").addEventListener("input",()=>{
+ focusEquation("E");
+ feedback();
+});
+
+$("temp").addEventListener("input",()=>{
+ focusEquation("T");
+ feedback();
+});
+
+// ===========================================
+// 8. 3D 움직임
+// ===========================================
+
+function updateParticles(){
+ const countL=Math.min(90,Math.round(left*22));
+ const countR=Math.min(90,Math.round(right*22));
+
+ leftParticles.forEach((p,i)=>p.visible=i<countL);
+ rightParticles.forEach((p,i)=>p.visible=i<countR);
+}
+
+function moveParticles(arr,side,dt){
+ const thermal=Math.sqrt(params().T/REF);
+ const scale=Math.min(dt*60,2);
 
  for(const obj of arr){
   if(!obj.visible)continue;
-  const d=obj.userData;
 
-  d.vx=d.vx*.90+(Math.random()-.5)*.007*thermal;
-  d.vy=d.vy*.90+(Math.random()-.5)*.007*thermal;
-  d.vz=d.vz*.90+(Math.random()-.5)*.007*thermal;
+  const v=obj.userData.velocity;
 
-  obj.position.x+=d.vx;
-  obj.position.y+=d.vy;
-  obj.position.z+=d.vz;
+  v.x=v.x*.97+(Math.random()-.5)*.003*thermal;
+  v.y=v.y*.97+(Math.random()-.5)*.003*thermal;
+  v.z=v.z*.97+(Math.random()-.5)*.003*thermal;
+
+  obj.position.addScaledVector(v,scale);
 
   if(side==="L"){
-   if(obj.position.x>-.22||obj.position.x< -4.1){
-    d.vx*=-1;
-    obj.position.x=Math.min(-.25,Math.max(-4.05,obj.position.x));
+   if(obj.position.x>-.22 || obj.position.x< -4.25){
+    v.x*=-1;
+    obj.position.x=Math.max(-4.2,
+     Math.min(-.25,obj.position.x));
    }
-  }else{
-   if(obj.position.x<.22||obj.position.x>4.1){
-    d.vx*=-1;
-    obj.position.x=Math.max(.25,Math.min(4.05,obj.position.x));
+  } else {
+   if(obj.position.x<.22 || obj.position.x>4.25){
+    v.x*=-1;
+    obj.position.x=Math.max(.25,
+     Math.min(4.2,obj.position.x));
    }
   }
-  if(Math.abs(obj.position.y)>2.5)d.vy*=-1;
-  if(Math.abs(obj.position.z)>3.0)d.vz*=-1;
+
+  if(Math.abs(obj.position.y)>2.55){
+   v.y*=-1;
+   obj.position.y=THREE.MathUtils.clamp(
+    obj.position.y,-2.55,2.55
+   );
+  }
+  if(Math.abs(obj.position.z)>3){
+   v.z*=-1;
+   obj.position.z=THREE.MathUtils.clamp(
+    obj.position.z,-3,3
+   );
+  }
  }
 }
 
-function chooseState(){
- let r=Math.random(),c=0;
- for(let i=0;i<4;i++){
-  c+=state[i];
-  if(r<=c)return i;
- }
- return 3;
-}
+// 개별 펌프의 확률적 상태 변화
+function updatePumps(dt,t){
+ const rt=rates();
 
-function animatePumps(t){
- const n=params().N;
- pumpObjects.forEach((p,i)=>{
-  p.group.visible=i<n;
-  if(i>=n)return;
+ pumps.forEach(p=>{
+  const s=p.state;
 
-  if(Math.random()<0.025)p.state=chooseState();
+  const forwardRate=rt.f[s];
+  const prev=(s+3)%4;
+  const backwardRate=rt.b[prev];
 
-  const positions=[-.65,-.40,.40,.65];
-  const target=positions[p.state];
-  p.ring.position.x+=(target-p.ring.position.x)*.13;
+  const sum=forwardRate+backwardRate;
+  const probability=1-Math.exp(-sum*dt);
 
-  p.ring.rotation.x=Math.sin(t*2+p.phase)*.17;
-  p.ring.rotation.z=Math.cos(t*1.3+p.phase)*.1;
+  if(sum>0 && Math.random()<probability){
+   const forward=Math.random()<
+    forwardRate/sum;
+
+   p.state=forward ? (s+1)%4 : prev;
+   p.pulse=1;
+  }
+
+  const target=[-.62,-.43,.43,.62][p.state];
+
+  p.ring.position.x=THREE.MathUtils.lerp(
+   p.ring.position.x,target,
+   Math.min(1,dt*5)
+  );
+
+  p.ring.rotation.x=Math.sin(t*2+p.phase)*.15;
+  p.ring.rotation.z=Math.cos(t*1.4+p.phase)*.10;
 
   p.cargo.visible=p.state===1||p.state===2;
   p.cargo.position.x=p.ring.position.x;
+
+  p.pulse*=Math.exp(-4*dt);
+  p.ring.scale.setScalar(1+.12*p.pulse);
  });
 }
 
-function resizeLab(){
- if(!labReady)return;
- const mount=$("labMount");
- const w=Math.max(1,mount.clientWidth);
- const h=Math.max(1,mount.clientHeight);
- labCamera.aspect=w/h;
- labCamera.updateProjectionMatrix();
- labRenderer.setSize(w,h);
+// ===========================================
+// 9. 결과 및 그래프
+// ===========================================
+
+function updateUI(){
+ const removal=(3-left)/3*100;
+
+ $("removal").textContent=removal.toFixed(1);
+ $("flux").textContent=flux.toFixed(3);
+ $("work").textContent=work.toFixed(2);
+
+ $("leftText").textContent=left.toFixed(2);
+ $("rightText").textContent=right.toFixed(2);
+
+ $("flowText").textContent=
+  flux>0.001 ? "이온 이동 →" :
+  flux<-.001 ? "← 역방향 이동" :
+  "순수송량 거의 0";
+
+ updateEquation();
 }
 
-// ============================================
-// PART F. 그래프
-// ============================================
+function record(){
+ history.push({
+  t:elapsed,
+  l:left,
+  r:right,
+  f:flux
+ });
 
-function chart(id,series){
- const canvas=$(id);
- const ctx=canvas.getContext("2d");
- const w=canvas.clientWidth;
- const h=canvas.clientHeight;
+ if(history.length>500)history.shift();
+}
+
+function drawGraph(){
+ if($("graphPopup").classList.contains("hidden"))return;
+
+ const canvas=$("graph");
+ const rect=canvas.getBoundingClientRect();
+ const w=Math.max(100,rect.width);
+ const h=Math.max(90,rect.height);
  const dpr=Math.min(devicePixelRatio,2);
 
- canvas.width=Math.round(w*dpr);
- canvas.height=Math.round(h*dpr);
+ canvas.width=w*dpr;
+ canvas.height=h*dpr;
+
+ const ctx=canvas.getContext("2d");
  ctx.setTransform(dpr,0,0,dpr,0,0);
  ctx.clearRect(0,0,w,h);
 
- const L=47,Rpad=12,Tpad=13,Bpad=27;
- const xmin=history.length?history[0].t:0;
- const xmax=Math.max(xmin+1,time);
+ const minT=history[0]?.t??0;
+ const maxT=Math.max(elapsed,minT+1);
+ const maxY=Math.max(3.2,...history.map(d=>d.r));
 
- const vals=series.flatMap(s=>history.map(d=>s.get(d)));
- const minY=Math.min(0,...vals);
- const maxY=Math.max(0.01,...vals);
- const span=Math.max(.01,maxY-minY);
+ const x=t=>35+(t-minT)/(maxT-minT)*(w-47);
+ const y=v=>12+(1-v/maxY)*(h-30);
 
- const xp=t=>L+(t-xmin)/(xmax-xmin)*(w-L-Rpad);
- const yp=v=>Tpad+(1-(v-minY)/span)*(h-Tpad-Bpad);
-
+ ctx.strokeStyle="#3a5268";
+ ctx.fillStyle="#93abc0";
  ctx.font="10px Arial";
- ctx.fillStyle="#9bb0c5";
- ctx.strokeStyle="#304559";
- ctx.lineWidth=1;
 
- for(let i=0;i<=4;i++){
-  const y=Tpad+(h-Tpad-Bpad)*i/4;
+ for(let i=0;i<4;i++){
+  const yy=12+i*(h-30)/3;
   ctx.beginPath();
-  ctx.moveTo(L,y);
-  ctx.lineTo(w-Rpad,y);
+  ctx.moveTo(35,yy);
+  ctx.lineTo(w-12,yy);
   ctx.stroke();
-  const value=maxY-span*i/4;
-  ctx.fillText(value.toFixed(2),3,y+3);
+  ctx.fillText((maxY*(1-i/3)).toFixed(1),3,yy+3);
  }
 
- ctx.fillText(xmin.toFixed(0),L,h-7);
- ctx.fillText(xmax.toFixed(0)+" s",w-40,h-7);
-
- for(const s of series){
-  ctx.strokeStyle=s.color;
+ for(const [key,color] of [
+  ["l","#53c8ff"],
+  ["r","#ffb371"]
+ ]){
+  ctx.strokeStyle=color;
   ctx.lineWidth=2;
   ctx.beginPath();
+
   history.forEach((d,i)=>{
-   const x=xp(d.t),y=yp(s.get(d));
-   if(i===0)ctx.moveTo(x,y);
-   else ctx.lineTo(x,y);
+   if(i===0)ctx.moveTo(x(d.t),y(d[key]));
+   else ctx.lineTo(x(d.t),y(d[key]));
   });
+
   ctx.stroke();
  }
 }
 
-function drawCharts(){
- if(mode!=="lab")return;
- chart("chart1",[
-  {color:"#49c8ff",get:d=>d.left},
-  {color:"#ffae70",get:d=>d.right}
- ]);
- chart("chart2",[
-  {color:"#5be3b7",get:d=>d.flux}
- ]);
-}
+$("graphBtn").onclick=()=>{
+ $("graphPopup").classList.toggle("hidden");
+ drawGraph();
+};
 
-// ============================================
-// PART G. 조작 및 화학식 강조
-// ============================================
+$("closeGraph").onclick=()=>{
+ $("graphPopup").classList.add("hidden");
+};
 
-function highlight(id){
- ["eq-binding","eq-temp","eq-energy"].forEach(x=>{
-  $(x).classList.toggle("active",x===id);
- });
-}
+$("reset").onclick=()=>{
+ reset();
+ feedback();
+};
 
-$("temp").addEventListener("input",()=>{
- updateLabels();highlight("eq-temp");
-});
-$("binding").addEventListener("input",()=>{
- updateLabels();highlight("eq-binding");
-});
-$("energy").addEventListener("input",()=>{
- updateLabels();highlight("eq-energy");
-});
-
-// 펌프 수와 초기 농도는 초기 조건이므로 재시작
-["conc","ratio","count"].forEach(id=>{
- $(id).addEventListener("change",reset);
- $(id).addEventListener("input",updateLabels);
-});
-
-$("reset").onclick=reset;
-$("play").onclick=()=>{
+$("pause").onclick=()=>{
  running=!running;
- $("play").textContent=running?"일시정지":"재생";
+ $("pause").textContent=
+  running?"일시정지":"재생";
 };
 
-$("speed").onclick=()=>{
- speed=speed===1?2:speed===2?4:1;
- $("speed").textContent="속도 ×"+speed;
-};
+// ===========================================
+// 10. 장면 전환 및 전체화면
+// ===========================================
 
-$("csv").onclick=()=>{
- const p=params();
- const headers=[
-  "time_s","left_mM","right_mM",
-  "flux_mM_s","work_mJ","occupied",
-  "temperature_K","binding_B","driving_kJ_mol","pumps"
- ];
- const rows=history.map(d=>[
-  d.t,d.left,d.right,d.flux,d.work,d.occupied,
-  p.T,p.B,p.E,p.N
- ]);
+function enterLab(){
+ mode="lab";
+ ship.visible=false;
+ lab.visible=true;
+ stars.visible=false;
+ mars.visible=false;
 
- const csv=[headers.join(","),
-  ...rows.map(row=>row.join(","))
- ].join("\n");
+ $("storyLayer").classList.add("hidden");
+ $("labLayer").classList.remove("hidden");
+ $("homeBtn").classList.remove("hidden");
 
- const blob=new Blob(["\uFEFF"+csv],{
-  type:"text/csv;charset=utf-8"
- });
- const url=URL.createObjectURL(blob);
- const link=document.createElement("a");
- link.href=url;
- link.download="molecular_pump_experiment.csv";
- document.body.appendChild(link);
- link.click();
- link.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
+ camera.position.set(9,6,12);
+ controls.target.set(0,0,0);
+ controls.enabled=true;
+ controls.update();
 
-// ============================================
-// PART H. 메인 애니메이션 루프
-// ============================================
-
-function resizeIntro(){
- const w=introMount.clientWidth;
- const h=introMount.clientHeight;
- shipCamera.aspect=w/h;
- shipCamera.updateProjectionMatrix();
- shipRenderer.setSize(w,h);
+ reset();
+ focusEquation("B");
+ feedback();
 }
 
-window.addEventListener("resize",()=>{
- if(mode==="intro")resizeIntro();
- else{resizeLab();drawCharts();}
+$("homeBtn").onclick=()=>{
+ mode="story";
+ storyIndex=0;
+
+ lab.visible=false;
+ ship.visible=true;
+ stars.visible=true;
+ mars.visible=true;
+
+ controls.enabled=false;
+
+ $("storyLayer").classList.remove("hidden");
+ $("labLayer").classList.add("hidden");
+ $("homeBtn").classList.add("hidden");
+
+ camera.position.set(12,7,19);
+ controls.target.set(0,0,0);
+
+ showStory();
+};
+
+$("fullBtn").onclick=async()=>{
+ try{
+  if(!document.fullscreenElement){
+   await document.documentElement.requestFullscreen();
+  }else{
+   await document.exitFullscreen();
+  }
+ }catch(e){
+  $("fullBtn").textContent="브라우저 전체화면 이용";
+  console.warn("Fullscreen unavailable:",e);
+ }
+};
+
+document.addEventListener("fullscreenchange",()=>{
+ $("fullBtn").textContent=
+  document.fullscreenElement?
+  "전체화면 종료":"⛶ 전체화면";
 });
 
-let previous=performance.now();
-let visualCounter=0;
-let chartCounter=0;
+// ===========================================
+// 11. 화면 비율
+// ===========================================
+
+function resize(){
+ const w=Math.max(1,mount.clientWidth);
+ const h=Math.max(1,mount.clientHeight);
+
+ camera.aspect=w/h;
+ camera.updateProjectionMatrix();
+ renderer.setSize(w,h,false);
+
+ drawGraph();
+}
+
+new ResizeObserver(resize).observe(mount);
+window.addEventListener("resize",resize);
+
+// ===========================================
+// 12. 메인 애니메이션
+// ===========================================
+
+let last=performance.now();
+let graphTimer=0;
+let visualTimer=0;
 
 function animate(now){
  requestAnimationFrame(animate);
- const delta=Math.min((now-previous)/1000,.05);
- previous=now;
 
- if(mode==="intro"){
-  spacecraft.rotation.y+=delta*.045;
-  spacecraft.rotation.z=Math.sin(now*.0004)*.03;
-  shipControls.update();
-  shipRenderer.render(shipScene,shipCamera);
-  return;
+ const dt=Math.min((now-last)/1000,.045);
+ last=now;
+
+ if(mode==="story"){
+  const s=story[storyIndex];
+
+  camera.position.lerp(cameraGoal,Math.min(1,dt*1.4));
+  controls.target.lerp(targetGoal,Math.min(1,dt*1.4));
+
+  // 우주선이 가만히 떠 있는 대신 계속 항해
+  ship.rotation.y=Math.sin(now*.00035)*.14;
+  ship.rotation.z=Math.sin(now*.0006)*.035;
+  ship.position.y=Math.sin(now*.0005)*.12;
+
+  if(s.alarm){
+   warningLamp.visible=true;
+   warningLamp.scale.setScalar(
+    .8+.35*Math.sin(now*.012)
+   );
+   waterGlow.material.opacity=
+    .08+.15*Math.abs(Math.sin(now*.004));
+
+   problemParticles.forEach((p,i)=>{
+    p.position.y+=dt*(.15+i%4*.045);
+    if(p.position.y>2.5)p.position.y=.5;
+   });
+  }else{
+   waterGlow.material.opacity=.045;
+  }
+
+  // 별 배경의 느린 움직임
+  stars.rotation.y+=dt*.0018;
+
+  controls.update();
+ }
+ else {
+  if(running){
+   // 계산 결과와 분자 움직임을 동시에 갱신
+   const steps=Math.max(1,Math.ceil(dt/.004));
+   for(let i=0;i<steps;i++){
+    chemistryStep(dt/steps);
+   }
+
+   visualTimer+=dt;
+   graphTimer+=dt;
+
+   updatePumps(dt,now/1000);
+
+   if(visualTimer>.04){
+    moveParticles(leftParticles,"L",visualTimer);
+    moveParticles(rightParticles,"R",visualTimer);
+    visualTimer=0;
+   }
+
+   if(graphTimer>.25){
+    record();
+    updateUI();
+    updateParticles();
+    drawGraph();
+    graphTimer=0;
+   }
+  }
+
+  controls.update();
  }
 
- if(!labReady)return;
-
- if(running){
-  const simDt=delta*speed;
-  const steps=Math.max(1,Math.ceil(simDt/DT));
-
-  for(let i=0;i<steps;i++){
-   step(simDt/steps);
-  }
-
-  visualCounter+=delta;
-  chartCounter+=delta;
-
-  if(visualCounter>.035){
-   labClock+=visualCounter;
-   animateParticles(leftIons,"L");
-   animateParticles(rightIons,"R");
-   animatePumps(labClock);
-   visualCounter=0;
-  }
-
-  if(chartCounter>.35){
-   sample();
-   updateNumbers();
-   updateLabels();
-   syncParticles();
-   drawCharts();
-   chartCounter=0;
-  }
- }
-
- labControls.update();
- labRenderer.render(labScene,labCamera);
+ renderer.render(scene,camera);
 }
 
-renderStory();
-resizeIntro();
+showStory();
 reset();
+resize();
 requestAnimationFrame(animate);
+
 </script>
 </body>
 </html>
 """
 
-components.html(HTML, height=1130, scrolling=True)
+components.html(HTML, height=1000, scrolling=False)
